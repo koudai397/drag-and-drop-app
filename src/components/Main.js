@@ -9,47 +9,36 @@ const Main = () => {
   const onDragEnd = (result) => {
     //   ドラッグアンドドロップのイベントが終了したときに呼ばれる
     const { source, destination } = result;
+    //   、ドラッグアンドドロップされたアイテムの元の位置（source）と、ドロップ先の位置（destination）が含まれてい
     if (source.droppableId !== destination.droppableId) {
-      //動かし始めたcolumnの配列の番号を取得()
       const sourceColIndex = data.findIndex((e) => e.id === source.droppableId);
-      //動かし終わったcolumnの配列の番号を取得()
+      // どこのタスク項目からアイテムが移動するか。何番目のタスクか数値として格納している。
+      // 「今やること」から移動するなら0、「終わったこと」から移動するなら2
       const destinationColIndex = data.findIndex(
         (e) => e.id === destination.droppableId
       );
-
+      // アイテムがどのタスク項目に移動するかが数値として格納される
       const sourceCol = data[sourceColIndex];
+      // 数値ではなく、値として格納する
       const destinationCol = data[destinationColIndex];
-
-      //動かし始めたタスクに属していたカラムの中のタスクを全て取得
-      //後でsplice関数でその動かし始めたタスクを削除するため
-      //sourceTaskに配列をコピーしておく(破壊操作を後でするため)
       const sourceTask = [...sourceCol.tasks];
-
-      //動かし終わったタスクに属していたカラムの中のタスクを全て取得
-      //後でsplice関数でその動かし始めたタスクを追加するため
       const destinationTask = [...destinationCol.tasks];
-
-      //前のカラムから削除
+      // spliceするのでコピー配列を作成
       const [removed] = sourceTask.splice(source.index, 1);
-      //後のカラムに追加
       destinationTask.splice(destination.index, 0, removed);
+      // ここでタスクの削除と追加を行っている
       data[sourceColIndex].tasks = sourceTask;
       data[destinationColIndex].tasks = destinationTask;
-
+      // それぞれのタスクを更新している
       setData(data);
-      // データを更新し、画面を再描画している
+      // 画面を再描画している
     } else {
-      //同じカラム内でタスクの入れ替え。
       const sourceColIndex = data.findIndex((e) => e.id === source.droppableId);
       const sourceCol = data[sourceColIndex];
-      console.log(sourceCol);
       const sourceTask = [...sourceCol.tasks];
-      console.log(sourceTask);
       const [removed] = sourceTask.splice(source.index, 1);
       sourceTask.splice(destination.index, 0, removed);
-
       data[sourceColIndex].tasks = sourceTask;
-
       setData(data);
       // データを更新し、画面を再描画している
     }
@@ -74,6 +63,8 @@ const Main = () => {
                       index={index}
                     >
                       {(provided, snapshot) => (
+                        // providedは必要だから書いている。下記のinnerRef、draggableProps、dragHandlePropsを使用してドラッグアンドドロップを制御している
+                        // snapshotを用いることでドラッグしている途中のDesignを変えることができる
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
@@ -81,7 +72,6 @@ const Main = () => {
                           style={{
                             ...provided.draggableProps.style,
                             opacity: snapshot.isDragging ? "0.5" : "1",
-                            // ドラッグしている途中のDesignを変えることができる
                           }}
                         >
                           <Card>{task.title}</Card>
@@ -91,6 +81,7 @@ const Main = () => {
                     </Draggable>
                   ))}
                   {provided.placeholder}
+                  {/* ドラッグアンドドロップしたときに空きスペースをつくる。 */}
                 </div>
               </div>
             )}
